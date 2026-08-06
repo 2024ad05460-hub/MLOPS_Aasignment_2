@@ -5,9 +5,11 @@ on:
     branches:
       - main
       - develop
+
   pull_request:
     branches:
       - main
+
   workflow_dispatch:
 
 permissions:
@@ -19,12 +21,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # GHCR/Docker image names must be lowercase.
+  # Docker and GHCR image repository names must be lowercase.
   IMAGE_NAME: ghcr.io/2024ad05460-hub/mlops_aasignment_2
 
 jobs:
   # ==========================================================
-  # M3: Continuous Integration
+  # M3 — Continuous Integration
   # ==========================================================
   test:
     name: Test
@@ -45,18 +47,26 @@ jobs:
           cache-dependency-path: requirements-ci.txt
 
       - name: Install test dependencies
+        shell: bash
         run: |
+          set -euo pipefail
+
           python -m pip install --upgrade pip
           python -m pip install -r requirements-ci.txt
           python -m pip install --no-deps -e .
 
       - name: Static analysis
+        shell: bash
         run: |
+          set -euo pipefail
           python -m ruff check src tests
 
       - name: Unit and API tests
+        shell: bash
         run: |
-          python -m pytest -q --junitxml=pytest-report.xml
+          set -euo pipefail
+          python -m pytest -q \
+            --junitxml=pytest-report.xml
 
       - name: Upload test evidence
         if: always()
@@ -68,7 +78,7 @@ jobs:
           retention-days: 14
 
   # ==========================================================
-  # M3: Build and publish Docker image
+  # M3 — Docker image build and artifact publishing
   # ==========================================================
   build-and-publish:
     name: Build and Publish
@@ -98,8 +108,25 @@ jobs:
           echo "Git LFS tracked files:"
           git lfs ls-files
 
-          echo "Model file details:"
+          echo "Model file information:"
           ls -lh models/model.pt
+
+      - name: Set up Python for model validation
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install CPU PyTorch for model validation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python -m pip install --upgrade pip
+
+          python -m pip install \
+            torch==2.11.0 \
+            --index-url https://download.pytorch.org/whl/cpu
 
       - name: Validate model artifact
         shell: bash
@@ -117,22 +144,22 @@ jobs:
                   "ERROR: models/model.pt does not exist."
               )
 
-          content = model_path.read_bytes()
+          model_bytes = model_path.read_bytes()
 
-          lfs_pointer = (
+          lfs_pointer_header = (
               b"version https://git-lfs.github.com/spec"
           )
 
-          if content.startswith(lfs_pointer):
+          if model_bytes.startswith(lfs_pointer_header):
               raise SystemExit(
                   "ERROR: models/model.pt is still an unresolved "
                   "Git LFS pointer."
               )
 
-          if len(content) < 100_000:
+          if len(model_bytes) < 100_000:
               raise SystemExit(
                   "ERROR: models/model.pt is unexpectedly small: "
-                  f"{len(content):,} bytes."
+                  f"{len(model_bytes):,} bytes."
               )
 
           payload = torch.load(
@@ -143,7 +170,7 @@ jobs:
 
           if not isinstance(payload, dict):
               raise SystemExit(
-                  "ERROR: Model bundle is not a dictionary."
+                  "ERROR: Model artifact is not a dictionary bundle."
               )
 
           required_keys = {
@@ -153,29 +180,35 @@ jobs:
               "image_size",
           }
 
-          missing_keys = required_keys.difference(payload)
+          missing_keys = required_keys.difference(payload.keys())
 
           if missing_keys:
               raise SystemExit(
-                  "ERROR: Model bundle is missing keys: "
+                  "ERROR: Model bundle is missing required keys: "
                   f"{sorted(missing_keys)}"
               )
 
-          print(
-              "Model artifact validated successfully:"
-          )
-          print(
-              f"  Size: {len(content):,} bytes"
-          )
-          print(
-              f"  Architecture: {payload['architecture']}"
-          )
-          print(
-              f"  Classes: {payload['class_names']}"
-          )
-          print(
-              f"  Image size: {payload['image_size']}"
-          )
+          architecture = payload["architecture"]
+          class_names = payload["class_names"]
+          image_size = payload["image_size"]
+
+          if architecture != "mobilenet_v3_small":
+              raise SystemExit(
+                  "ERROR: Unexpected model architecture: "
+                  f"{architecture}"
+              )
+
+          if class_names != ["cat", "dog"]:
+              raise SystemExit(
+                  "ERROR: Unexpected model classes: "
+                  f"{class_names}"
+              )
+
+          print("Model artifact validation passed.")
+          print(f"Size: {len(model_bytes):,} bytes")
+          print(f"Architecture: {architecture}")
+          print(f"Classes: {class_names}")
+          print(f"Image size: {image_size}")
           PY
 
       - name: Set up Docker Buildx
@@ -193,32 +226,42 @@ jobs:
         id: image
         shell: bash
         run: |
-          echo \
-            "image_sha=${IMAGE_NAME}:sha-${GITHUB_SHA::7}" \
-            >> "$GITHUB_OUTPUT"
+          set -euo pipefail
 
-          echo \
-            "image_latest=${IMAGE_NAME}:latest" \
-            >> "$GITHUB_OUTPUT"
+          IMAGE_SHA="${IMAGE_NAME}:sha-${GITHUB_SHA::7}"
+          IMAGE_LATEST="${IMAGE_NAME}:latest"
 
-      - name: Generate image metadata
+          echo "image_sha=${IMAGE_SHA}" \
+            >> "${GITHUB_OUTPUT}"
+
+          echo "image_latest=${IMAGE_LATEST}" \
+            >> "${GITHUB_OUTPUT}"
+
+          echo "SHA image: ${IMAGE_SHA}"
+          echo "Latest image: ${IMAGE_LATEST}"
+
+      - name: Generate Docker image metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_NAME }}
+
           tags: |
             type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
           labels: |
             org.opencontainers.image.title=Cats Dogs MLOps API
             org.opencontainers.image.description=MobileNetV3 cats-versus-dogs inference service
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.sha }}
 
-      - name: Build and optionally publish image
+      - name: Build and optionally publish Docker image
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -228,14 +271,16 @@ jobs:
           sbom: true
 
   # ==========================================================
-  # M4: Temporary deployment and smoke testing
+  # M4 — Temporary deployment and smoke testing
   # ==========================================================
   deploy-and-smoke-test:
     name: Deploy and Smoke Test
     needs: build-and-publish
+
     if: >
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
     environment: production
 
@@ -243,7 +288,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          lfs: true
           fetch-depth: 0
 
       - name: Set up Python
@@ -259,8 +303,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull and deploy published image
+        shell: bash
         env:
           IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
+
         run: |
           set -euo pipefail
 
@@ -274,17 +320,22 @@ jobs:
             -f deployment/docker-compose.ci.yml \
             up -d
 
+          echo "Docker Compose status:"
+
           docker compose \
             -f deployment/docker-compose.ci.yml \
             ps
 
       - name: Wait for health endpoint
         shell: bash
+        env:
+          IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
+
         run: |
           set -euo pipefail
 
-          for attempt in $(seq 1 30); do
-            echo "Health-check attempt ${attempt}/30"
+          for attempt in $(seq 1 40); do
+            echo "Health-check attempt ${attempt}/40"
 
             if curl \
               --fail \
@@ -297,10 +348,10 @@ jobs:
               exit 0
             fi
 
-            sleep 2
+            sleep 3
           done
 
-          echo "API did not become healthy."
+          echo "ERROR: API did not become healthy."
 
           docker compose \
             -f deployment/docker-compose.ci.yml \
@@ -313,16 +364,25 @@ jobs:
           exit 1
 
       - name: Install smoke-test dependency
+        shell: bash
         run: |
+          set -euo pipefail
+
+          python -m pip install --upgrade pip
           python -m pip install requests==2.32.5
 
-      - name: Post-deployment smoke test
+      - name: Run post-deployment smoke test
+        shell: bash
         env:
           PYTHONPATH: src
+
         run: |
+          set -euo pipefail
+
           python -m cats_dogs_mlops.smoke_test \
             --base-url http://localhost:8000 \
-            --image tests/assets/cat_demo.png
+            --image tests/assets/cat_demo.png \
+            | tee smoke-test-output.json
 
       - name: Verify Prometheus metrics endpoint
         shell: bash
@@ -348,9 +408,14 @@ jobs:
             "cats_dogs_predictions_total" \
             prometheus-metrics.txt
 
+          echo "Prometheus metric validation passed."
+
       - name: Capture deployment status and logs
         if: always()
         shell: bash
+        env:
+          IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
+
         run: |
           {
             echo "===== Docker Compose Status ====="
@@ -365,6 +430,7 @@ jobs:
             docker compose \
               -f deployment/docker-compose.ci.yml \
               logs
+
           } > deployment-logs.txt 2>&1
 
       - name: Upload deployment evidence
@@ -375,13 +441,16 @@ jobs:
           path: |
             deployment-logs.txt
             prometheus-metrics.txt
+            smoke-test-output.json
           if-no-files-found: warn
           retention-days: 14
 
       - name: Stop temporary deployment
         if: always()
+        shell: bash
         env:
           IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
+
         run: |
           docker compose \
             -f deployment/docker-compose.ci.yml \
@@ -390,41 +459,48 @@ jobs:
             --remove-orphans
 
   # ==========================================================
-  # Optional persistent deployment to a configured VM
+  # Optional persistent remote deployment
   # ==========================================================
   persistent-remote-deploy:
     name: Persistent Remote Deploy
     needs: deploy-and-smoke-test
+
     if: vars.ENABLE_REMOTE_DEPLOY == 'true'
+
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Deploy on configured VM through SSH
+      - name: Deploy to configured VM through SSH
         uses: appleboy/ssh-action@v1.2.4
+
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}:latest
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+
           envs: >
             IMAGE_NAME,
             GHCR_USER,
             GHCR_TOKEN,
             DEPLOY_PATH
+
           script_stop: true
+
           script: |
-            set -e
+            set -euo pipefail
 
             cd "${DEPLOY_PATH}"
 
             echo "${GHCR_TOKEN}" |
               docker login ghcr.io \
-                -u "${GHCR_USER}" \
+                --username "${GHCR_USER}" \
                 --password-stdin
 
             export IMAGE_NAME="${IMAGE_NAME}"
@@ -442,7 +518,9 @@ jobs:
 
             HEALTHY=false
 
-            for attempt in $(seq 1 30); do
+            for attempt in $(seq 1 40); do
+              echo "Remote health-check attempt ${attempt}/40"
+
               if curl \
                 --fail \
                 --silent \
@@ -453,11 +531,11 @@ jobs:
                 break
               fi
 
-              sleep 2
+              sleep 3
             done
 
             if [ "${HEALTHY}" != "true" ]; then
-              echo "Remote API health check failed."
+              echo "ERROR: Remote API health check failed."
 
               docker compose \
                 -f deployment/docker-compose.yml \
