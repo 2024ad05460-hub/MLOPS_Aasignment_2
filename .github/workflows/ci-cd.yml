@@ -1,0 +1,165 @@
+name: CI-CD Cats Dogs MLOps
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: cats-dogs-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install --no-deps -e .
+
+      - name: Static analysis
+        run: ruff check src tests
+
+      - name: Unit and API tests
+        run: pytest --junitxml=pytest-report.xml
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pytest-report
+          path: pytest-report.xml
+
+  build-and-publish:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and optionally publish image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+  deploy-and-smoke-test:
+    needs: build-and-publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and deploy published image
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}:latest
+        run: |
+          docker compose -f deployment/docker-compose.ci.yml pull
+          docker compose -f deployment/docker-compose.ci.yml up -d
+
+      - name: Wait for health endpoint
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f deployment/docker-compose.ci.yml logs
+          exit 1
+
+      - name: Post-deployment smoke test
+        run: |
+          python -m pip install requests==2.32.5
+          PYTHONPATH=src python -m cats_dogs_mlops.smoke_test \
+            --base-url http://localhost:8000 \
+            --image tests/assets/cat_demo.png
+
+      - name: Capture deployment logs
+        if: always()
+        run: docker compose -f deployment/docker-compose.ci.yml logs > deployment-logs.txt
+
+      - name: Upload deployment evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: deployment-evidence
+          path: deployment-logs.txt
+
+  persistent-remote-deploy:
+    needs: deploy-and-smoke-test
+    if: vars.ENABLE_REMOTE_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy on configured VM via SSH
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f deployment/docker-compose.yml pull api
+            docker compose -f deployment/docker-compose.yml up -d api prometheus grafana
+            PYTHONPATH=src python -m cats_dogs_mlops.smoke_test --base-url http://localhost:8000 --image tests/assets/cat_demo.png

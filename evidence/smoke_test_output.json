@@ -1,0 +1,23 @@
+{
+  "health": {
+    "status": "healthy",
+    "model_loaded": true,
+    "architecture": "tinycnn",
+    "classes": [
+      "cat",
+      "dog"
+    ],
+    "image_size": 224
+  },
+  "prediction": {
+    "request_id": "c83f2559-97ac-42c7-87fd-89448d38526c",
+    "label": "cat",
+    "confidence": 0.767061,
+    "probabilities": {
+      "cat": 0.767061,
+      "dog": 0.232939
+    },
+    "latency_ms": 23.974,
+    "model_version": "bootstrap-v1"
+  }
+}

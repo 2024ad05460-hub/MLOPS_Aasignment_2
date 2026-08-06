@@ -1,0 +1,3 @@
+daa02ba (HEAD -> main) chore: remove render intermediates and ignore generated bundle
+3a71bf0 docs: add validated runtime evidence and submission guidance
+a43b784 feat: implement end-to-end cats-dogs MLOps pipeline

@@ -1,0 +1,49 @@
+INFO:     Started server process [1492]
+INFO:     Waiting for application startup.
+{"event": "startup", "model_path": "models/model.pt", "architecture": "tinycnn", "class_names": ["cat", "dog"]}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8765 (Press CTRL+C to quit)
+{"event": "request_complete", "latency_ms": 1.19, "method": "GET", "path": "/health", "request_id": "06f1df48-cc56-423e-b53f-1ed23d372630", "status_code": 200}
+INFO:     127.0.0.1:35790 - "GET /health HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 0.75, "method": "GET", "path": "/health", "request_id": "b1845ed2-1c8e-4ffa-8415-da6f76a599fb", "status_code": 200}
+INFO:     127.0.0.1:35792 - "GET /health HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 33.854, "method": "POST", "path": "/predict", "request_id": "f9f60384-c93c-483d-9385-373fa70961a0", "status_code": 200}
+INFO:     127.0.0.1:35798 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 8.147, "method": "POST", "path": "/predict", "request_id": "7efea983-0546-4e9c-b4e0-aea9625774d9", "status_code": 200}
+INFO:     127.0.0.1:35548 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 3.506, "method": "POST", "path": "/feedback", "request_id": "57e1f490-0907-41e0-971f-c8f46d098f9f", "status_code": 200}
+INFO:     127.0.0.1:35560 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 10.957, "method": "POST", "path": "/predict", "request_id": "c03c226b-e819-4863-b958-265c66e7397a", "status_code": 200}
+INFO:     127.0.0.1:35574 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 3.01, "method": "POST", "path": "/feedback", "request_id": "e79b842d-807e-4a6e-8d24-11ec4b27bd22", "status_code": 200}
+INFO:     127.0.0.1:35586 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 7.288, "method": "POST", "path": "/predict", "request_id": "0dbfce40-ec5d-4b60-b3ff-d7a203fe71b3", "status_code": 200}
+INFO:     127.0.0.1:35588 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 3.022, "method": "POST", "path": "/feedback", "request_id": "64b1df72-ea55-4670-b069-3c8920a58459", "status_code": 200}
+INFO:     127.0.0.1:35596 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 7.348, "method": "POST", "path": "/predict", "request_id": "8e211f83-5780-441a-b389-aded2b52dd67", "status_code": 200}
+INFO:     127.0.0.1:35610 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 1.96, "method": "POST", "path": "/feedback", "request_id": "19a84c82-fa7f-4d38-b41f-1ad8a2bcfb55", "status_code": 200}
+INFO:     127.0.0.1:35614 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 9.858, "method": "POST", "path": "/predict", "request_id": "05abf484-9d4b-41a3-8b28-de19ab684832", "status_code": 200}
+INFO:     127.0.0.1:35624 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 2.024, "method": "POST", "path": "/feedback", "request_id": "42829e82-eddb-4c94-8e95-8de87930bef5", "status_code": 200}
+INFO:     127.0.0.1:35626 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 10.235, "method": "POST", "path": "/predict", "request_id": "2f920368-b9a0-488e-9709-83a2af832bf2", "status_code": 200}
+INFO:     127.0.0.1:35638 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 2.193, "method": "POST", "path": "/feedback", "request_id": "e2095cc1-7bd0-437f-920a-a2b8e771b4fd", "status_code": 200}
+INFO:     127.0.0.1:35642 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 11.863, "method": "POST", "path": "/predict", "request_id": "f3fe5092-b01e-4d6e-8302-d48e473141d9", "status_code": 200}
+INFO:     127.0.0.1:35644 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 2.124, "method": "POST", "path": "/feedback", "request_id": "e80b84e3-b9e1-4c55-b1ae-367a91cf7704", "status_code": 200}
+INFO:     127.0.0.1:35660 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 7.927, "method": "POST", "path": "/predict", "request_id": "b6a48184-6c3e-404d-82e3-9e8b2c9bc080", "status_code": 200}
+INFO:     127.0.0.1:35672 - "POST /predict HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 2.484, "method": "POST", "path": "/feedback", "request_id": "0ce4c5a8-6fb4-44e7-a0f7-e613697c66f8", "status_code": 200}
+INFO:     127.0.0.1:35684 - "POST /feedback HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 0.582, "method": "GET", "path": "/monitoring/performance", "request_id": "71c7f24c-c004-4f08-9fcb-1ec123993d0f", "status_code": 200}
+INFO:     127.0.0.1:35696 - "GET /monitoring/performance HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 1.191, "method": "GET", "path": "/metrics", "request_id": "05a51911-0f7a-44a8-add0-0a901066e4b1", "status_code": 200}
+INFO:     127.0.0.1:35706 - "GET /metrics HTTP/1.1" 200 OK
+{"event": "request_complete", "latency_ms": 0.537, "method": "GET", "path": "/monitoring/performance", "request_id": "59ceaa19-48ee-4006-9462-80e8e8f8738c", "status_code": 200}
+INFO:     127.0.0.1:35710 - "GET /monitoring/performance HTTP/1.1" 200 OK

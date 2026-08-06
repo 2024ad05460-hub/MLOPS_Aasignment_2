@@ -1,0 +1,32 @@
+name: Scheduled Model Retraining
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 1 * *"
+
+permissions:
+  contents: write
+
+jobs:
+  retrain:
+    if: vars.ENABLE_SCHEDULED_RETRAINING == 'true'
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: |
+          pip install -r requirements.txt
+          pip install -e .
+          dvc pull
+          dvc repro
+          pytest
+      - name: Commit updated DVC metadata and metrics
+        run: |
+          git config user.name "mlops-bot"
+          git config user.email "mlops-bot@users.noreply.github.com"
+          git add dvc.lock reports/*.json models/model.pt.dvc || true
+          git diff --cached --quiet || git commit -m "chore: scheduled model retraining"
+          git push

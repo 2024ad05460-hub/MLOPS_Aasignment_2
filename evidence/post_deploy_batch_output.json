@@ -1,0 +1,65 @@
+{
+  "requests": [
+    {
+      "file": "test/cat/cat.19_a84d1631bd12.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "correct": true
+    },
+    {
+      "file": "test/cat/cat.37_9d693b24b97a.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "correct": true
+    },
+    {
+      "file": "test/cat/cat.0_1970ac9a9e5b.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "correct": true
+    },
+    {
+      "file": "test/cat/cat.32_3b9cd0d853e1.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "correct": true
+    },
+    {
+      "file": "test/dog/dog.35_1e50619099c4.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "correct": true
+    },
+    {
+      "file": "test/dog/dog.14_6643d6ee88c3.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "correct": true
+    },
+    {
+      "file": "test/dog/dog.23_1688938df902.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "correct": true
+    },
+    {
+      "file": "test/dog/dog.10_0f0f74aedc73.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "correct": true
+    }
+  ],
+  "performance": {
+    "labeled_count": 8,
+    "correct_count": 8,
+    "accuracy": 1.0,
+    "true_label_distribution": {
+      "cat": 4,
+      "dog": 4
+    },
+    "prediction_distribution": {
+      "cat": 4,
+      "dog": 4
+    }
+  }
+}

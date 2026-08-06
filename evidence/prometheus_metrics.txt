@@ -1,0 +1,112 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 7763.0
+python_gc_objects_collected_total{generation="1"} 1649.0
+python_gc_objects_collected_total{generation="2"} 180.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 297.0
+python_gc_collections_total{generation="1"} 27.0
+python_gc_collections_total{generation="2"} 2.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="13",patchlevel="5",version="3.13.5"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.506619392e+09
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 4.20786176e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.78573394926e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 3.61
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 22.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1024.0
+# HELP cats_dogs_requests_total Total HTTP requests
+# TYPE cats_dogs_requests_total counter
+cats_dogs_requests_total{endpoint="/health",method="GET",status="200"} 2.0
+cats_dogs_requests_total{endpoint="/predict",method="POST",status="200"} 9.0
+cats_dogs_requests_total{endpoint="/feedback",method="POST",status="200"} 8.0
+cats_dogs_requests_total{endpoint="/monitoring/performance",method="GET",status="200"} 1.0
+# HELP cats_dogs_requests_created Total HTTP requests
+# TYPE cats_dogs_requests_created gauge
+cats_dogs_requests_created{endpoint="/health",method="GET",status="200"} 1.7857339539261894e+09
+cats_dogs_requests_created{endpoint="/predict",method="POST",status="200"} 1.7857339630722122e+09
+cats_dogs_requests_created{endpoint="/feedback",method="POST",status="200"} 1.7857339636293287e+09
+cats_dogs_requests_created{endpoint="/monitoring/performance",method="GET",status="200"} 1.785733963749697e+09
+# HELP cats_dogs_request_latency_seconds HTTP request latency in seconds
+# TYPE cats_dogs_request_latency_seconds histogram
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.01"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.025"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.05"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.1"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.25"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="0.5"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="1.0"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="2.5"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="5.0"} 2.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/health",le="+Inf"} 2.0
+cats_dogs_request_latency_seconds_count{endpoint="/health"} 2.0
+cats_dogs_request_latency_seconds_sum{endpoint="/health"} 0.0019396899997445871
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.01"} 5.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.025"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.05"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.1"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.25"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="0.5"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="1.0"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="2.5"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="5.0"} 9.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/predict",le="+Inf"} 9.0
+cats_dogs_request_latency_seconds_count{endpoint="/predict"} 9.0
+cats_dogs_request_latency_seconds_sum{endpoint="/predict"} 0.10747634500035019
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.01"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.025"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.05"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.1"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.25"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="0.5"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="1.0"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="2.5"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="5.0"} 8.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/feedback",le="+Inf"} 8.0
+cats_dogs_request_latency_seconds_count{endpoint="/feedback"} 8.0
+cats_dogs_request_latency_seconds_sum{endpoint="/feedback"} 0.02032265799994093
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.01"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.025"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.05"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.1"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.25"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="0.5"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="1.0"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="2.5"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="5.0"} 1.0
+cats_dogs_request_latency_seconds_bucket{endpoint="/monitoring/performance",le="+Inf"} 1.0
+cats_dogs_request_latency_seconds_count{endpoint="/monitoring/performance"} 1.0
+cats_dogs_request_latency_seconds_sum{endpoint="/monitoring/performance"} 0.0005818969998472312
+# HELP cats_dogs_request_latency_seconds_created HTTP request latency in seconds
+# TYPE cats_dogs_request_latency_seconds_created gauge
+cats_dogs_request_latency_seconds_created{endpoint="/health"} 1.7857339539262455e+09
+cats_dogs_request_latency_seconds_created{endpoint="/predict"} 1.7857339630722322e+09
+cats_dogs_request_latency_seconds_created{endpoint="/feedback"} 1.7857339636293468e+09
+cats_dogs_request_latency_seconds_created{endpoint="/monitoring/performance"} 1.785733963749714e+09
+# HELP cats_dogs_predictions_total Total model predictions
+# TYPE cats_dogs_predictions_total counter
+cats_dogs_predictions_total{label="cat"} 5.0
+cats_dogs_predictions_total{label="dog"} 4.0
+# HELP cats_dogs_predictions_created Total model predictions
+# TYPE cats_dogs_predictions_created gauge
+cats_dogs_predictions_created{label="cat"} 1.7857339630632927e+09
+cats_dogs_predictions_created{label="dog"} 1.7857339636853266e+09

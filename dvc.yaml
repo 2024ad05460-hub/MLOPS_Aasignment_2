@@ -1,0 +1,78 @@
+stages:
+  prepare:
+    cmd: >-
+      python -m cats_dogs_mlops.prepare_data
+      --raw-dir ${data.raw_dir}
+      --processed-dir ${data.processed_dir}
+      --image-size ${data.image_size}
+      --train-ratio ${data.train_ratio}
+      --val-ratio ${data.validation_ratio}
+      --seed ${data.seed}
+    deps:
+      - ${data.raw_dir}
+      - src/cats_dogs_mlops/data.py
+      - src/cats_dogs_mlops/prepare_data.py
+    params:
+      - data.raw_dir
+      - data.processed_dir
+      - data.image_size
+      - data.train_ratio
+      - data.validation_ratio
+      - data.seed
+    outs:
+      - ${data.processed_dir}
+
+  train:
+    cmd: >-
+      python -m cats_dogs_mlops.train
+      --manifest ${data.processed_dir}/manifest.csv
+      --model-out models/model.pt
+      --metrics-out reports/train_metrics.json
+      --figures-dir figures
+      --architecture ${training.architecture}
+      --epochs ${training.epochs}
+      --batch-size ${training.batch_size}
+      --learning-rate ${training.learning_rate}
+      --weight-decay ${training.weight_decay}
+      --image-size ${data.image_size}
+      --seed ${training.seed}
+    deps:
+      - ${data.processed_dir}
+      - src/cats_dogs_mlops/data.py
+      - src/cats_dogs_mlops/model.py
+      - src/cats_dogs_mlops/train.py
+    params:
+      - training.architecture
+      - training.epochs
+      - training.batch_size
+      - training.learning_rate
+      - training.weight_decay
+      - training.seed
+      - data.image_size
+    outs:
+      - models/model.pt
+      - figures/loss_curves.png
+      - figures/confusion_matrix.png
+    metrics:
+      - reports/train_metrics.json:
+          cache: false
+
+  evaluate:
+    cmd: >-
+      python -m cats_dogs_mlops.evaluate
+      --manifest ${data.processed_dir}/manifest.csv
+      --model models/model.pt
+      --metrics-out reports/test_metrics.json
+      --batch-size ${training.batch_size}
+    deps:
+      - ${data.processed_dir}/manifest.csv
+      - models/model.pt
+      - src/cats_dogs_mlops/data.py
+      - src/cats_dogs_mlops/model.py
+      - src/cats_dogs_mlops/evaluate.py
+    params:
+      - data.processed_dir
+      - training.batch_size
+    metrics:
+      - reports/test_metrics.json:
+          cache: false

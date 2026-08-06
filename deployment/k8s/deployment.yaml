@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cats-dogs-api
+  labels:
+    app: cats-dogs-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cats-dogs-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: cats-dogs-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/REPLACE_USERNAME/cats-dogs-mlops:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: MODEL_PATH
+              value: /app/models/model.pt
+            - name: MONITORING_DB
+              value: /app/monitoring/predictions.db
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          volumeMounts:
+            - name: monitoring
+              mountPath: /app/monitoring
+      volumes:
+        - name: monitoring
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cats-dogs-api
+spec:
+  selector:
+    app: cats-dogs-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+  type: ClusterIP

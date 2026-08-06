@@ -1,0 +1,44 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Requests / 5 min",
+      "targets": [{"expr": "sum(increase(cats_dogs_requests_total[5m]))", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "P95 request latency",
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(cats_dogs_request_latency_seconds_bucket[5m])) by (le))", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "Prediction classes",
+      "targets": [{"expr": "sum by (label) (rate(cats_dogs_predictions_total[5m]))", "legendFormat": "{{label}}", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0}
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP error rate",
+      "targets": [{"expr": "sum(rate(cats_dogs_requests_total{status=~\"4..|5..\"}[5m]))", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Request throughput",
+      "targets": [{"expr": "sum(rate(cats_dogs_requests_total[1m]))", "refId": "A"}],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+    }
+  ],
+  "schemaVersion": 42,
+  "tags": ["mlops", "cats-dogs"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "title": "Cats vs Dogs MLOps Monitoring",
+  "uid": "cats-dogs-mlops",
+  "version": 1
+}

@@ -1,0 +1,11 @@
+dvc.yaml                                                               PASS
+params.yaml                                                            PASS
+deployment/docker-compose.yml                                          PASS
+deployment/docker-compose.ci.yml                                       PASS
+.github/workflows/ci-cd.yml                                            PASS
+.github/workflows/model-retrain.yml                                    PASS
+deployment/k8s/deployment.yaml                                         PASS
+deployment/k8s/hpa.yaml                                                PASS
+monitoring/prometheus.yml                                              PASS
+deployment/grafana/provisioning/datasources/prometheus.yml             PASS
+deployment/grafana/provisioning/dashboards/dashboard.yml               PASS

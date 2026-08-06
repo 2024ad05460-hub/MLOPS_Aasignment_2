@@ -1,0 +1,15 @@
+services:
+  api:
+    image: ${IMAGE_NAME}
+    container_name: cats-dogs-api-ci
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_PATH: /app/models/model.pt
+      MONITORING_DB: /app/monitoring/predictions.db
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
