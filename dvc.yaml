@@ -67,6 +67,9 @@ stages:
       - data.image_size
 
     outs:
+      - models/model.pt:
+          cache: false
+          persist: true
       - figures/loss_curves.png
       - figures/confusion_matrix.png
       - figures/roc_curve.png

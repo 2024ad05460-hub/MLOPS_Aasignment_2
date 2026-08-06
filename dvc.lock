@@ -87,6 +87,10 @@ stages:
       hash: md5
       md5: b40cccde26e34f647f0e509984e00e56
       size: 49119
+    - path: models/model.pt
+      hash: md5
+      md5: 0e0e4c30125dc5aebd861e4599c3625b
+      size: 6200099
     - path: reports/train_metrics.json
       hash: md5
       md5: 8990c691e88903b9c77db511a50e03a9
