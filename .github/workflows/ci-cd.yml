@@ -2,9 +2,12 @@ name: CI-CD Cats Dogs MLOps
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -16,11 +19,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  # Docker/GHCR repository names must be lowercase.
+  IMAGE_NAME: ghcr.io/2024ad05460-hub/mlops_aasignment_2
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -35,14 +41,16 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-ci.txt
-          pip install --no-deps -e .
+          python -m pip install -r requirements-ci.txt
+          python -m pip install --no-deps -e .
 
       - name: Static analysis
-        run: ruff check src tests
+        run: |
+          python -m ruff check src tests
 
       - name: Unit and API tests
-        run: pytest --junitxml=pytest-report.xml
+        run: |
+          python -m pytest -q --junitxml=pytest-report.xml
 
       - name: Upload test evidence
         if: always()
@@ -50,12 +58,18 @@ jobs:
         with:
           name: pytest-report
           path: pytest-report.xml
+          if-no-files-found: error
+          retention-days: 14
 
   build-and-publish:
+    name: Build and Publish
     needs: test
     runs-on: ubuntu-latest
+
     outputs:
-      image: ${{ steps.meta.outputs.tags }}
+      image_sha: ${{ steps.image.outputs.image_sha }}
+      image_latest: ${{ steps.image.outputs.image_latest }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -71,14 +85,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Define image references
+        id: image
+        shell: bash
+        run: |
+          echo "image_sha=${IMAGE_NAME}:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "image_latest=${IMAGE_NAME}:latest" >> "$GITHUB_OUTPUT"
+
       - name: Generate image metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          labels: |
+            org.opencontainers.image.title=Cats Dogs MLOps API
+            org.opencontainers.image.description=MobileNetV3 cats-versus-dogs inference service
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Build and optionally publish image
         uses: docker/build-push-action@v7
@@ -93,10 +119,12 @@ jobs:
           sbom: true
 
   deploy-and-smoke-test:
+    name: Deploy and Smoke Test
     needs: build-and-publish
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -110,56 +138,139 @@ jobs:
 
       - name: Pull and deploy published image
         env:
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}:latest
+          IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
         run: |
+          echo "Deploying image: ${IMAGE_NAME}"
           docker compose -f deployment/docker-compose.ci.yml pull
           docker compose -f deployment/docker-compose.ci.yml up -d
+          docker compose -f deployment/docker-compose.ci.yml ps
 
       - name: Wait for health endpoint
+        shell: bash
         run: |
+          set -euo pipefail
+
           for attempt in $(seq 1 30); do
-            if curl -fsS http://localhost:8000/health; then
+            echo "Health-check attempt ${attempt}/30"
+
+            if curl --fail --silent --show-error \
+              http://localhost:8000/health; then
+              echo
+              echo "API health check passed."
               exit 0
             fi
+
             sleep 2
           done
+
+          echo "API did not become healthy."
+          docker compose -f deployment/docker-compose.ci.yml ps
           docker compose -f deployment/docker-compose.ci.yml logs
           exit 1
 
-      - name: Post-deployment smoke test
+      - name: Install smoke-test dependency
         run: |
           python -m pip install requests==2.32.5
-          PYTHONPATH=src python -m cats_dogs_mlops.smoke_test \
+
+      - name: Post-deployment smoke test
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m cats_dogs_mlops.smoke_test \
             --base-url http://localhost:8000 \
             --image tests/assets/cat_demo.png
 
-      - name: Capture deployment logs
+      - name: Verify Prometheus metrics endpoint
+        run: |
+          curl --fail --silent --show-error \
+            http://localhost:8000/metrics \
+            > prometheus-metrics.txt
+
+          grep "cats_dogs_requests_total" prometheus-metrics.txt
+          grep "cats_dogs_request_latency_seconds" prometheus-metrics.txt
+          grep "cats_dogs_predictions_total" prometheus-metrics.txt
+
+      - name: Capture deployment status and logs
         if: always()
-        run: docker compose -f deployment/docker-compose.ci.yml logs > deployment-logs.txt
+        shell: bash
+        run: |
+          {
+            echo "===== Docker Compose Status ====="
+            docker compose -f deployment/docker-compose.ci.yml ps
+            echo
+            echo "===== Docker Compose Logs ====="
+            docker compose -f deployment/docker-compose.ci.yml logs
+          } > deployment-logs.txt 2>&1
 
       - name: Upload deployment evidence
         if: always()
         uses: actions/upload-artifact@v5
         with:
           name: deployment-evidence
-          path: deployment-logs.txt
+          path: |
+            deployment-logs.txt
+            prometheus-metrics.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop temporary deployment
+        if: always()
+        env:
+          IMAGE_NAME: ${{ needs.build-and-publish.outputs.image_latest }}
+        run: |
+          docker compose -f deployment/docker-compose.ci.yml down \
+            --volumes \
+            --remove-orphans
 
   persistent-remote-deploy:
+    name: Persistent Remote Deploy
     needs: deploy-and-smoke-test
     if: vars.ENABLE_REMOTE_DEPLOY == 'true'
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Deploy on configured VM via SSH
         uses: appleboy/ssh-action@v1.2.4
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}:latest
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: IMAGE_NAME,GHCR_USER,GHCR_TOKEN,DEPLOY_PATH
+          script_stop: true
           script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest
-            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose -f deployment/docker-compose.yml pull api
-            docker compose -f deployment/docker-compose.yml up -d api prometheus grafana
-            PYTHONPATH=src python -m cats_dogs_mlops.smoke_test --base-url http://localhost:8000 --image tests/assets/cat_demo.png
+            set -e
+
+            cd "${DEPLOY_PATH}"
+
+            echo "${GHCR_TOKEN}" |
+              docker login ghcr.io \
+                -u "${GHCR_USER}" \
+                --password-stdin
+
+            export IMAGE_NAME="${IMAGE_NAME}"
+
+            docker compose \
+              -f deployment/docker-compose.yml \
+              pull api
+
+            docker compose \
+              -f deployment/docker-compose.yml \
+              up -d api prometheus grafana
+
+            for attempt in $(seq 1 30); do
+              if curl -fsS http://localhost:8000/health; then
+                break
+              fi
+              sleep 2
+            done
+
+            PYTHONPATH=src \
+              python -m cats_dogs_mlops.smoke_test \
+                --base-url http://localhost:8000 \
+                --image tests/assets/cat_demo.png
