@@ -8,11 +8,11 @@ data:
   max_per_class: null
 
 training:
-  architecture: tinycnn
-  pretrained: false
+  architecture: mobilenet_v3_small
+  pretrained: true
   freeze_backbone: false
-  epochs: 5
-  batch_size: 16
-  learning_rate: 0.001
+  epochs: 15
+  batch_size: 32
+  learning_rate: 0.0001
   weight_decay: 0.0001
   seed: 42

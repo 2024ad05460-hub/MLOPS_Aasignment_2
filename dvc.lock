@@ -33,3 +33,99 @@ stages:
       md5: b35f5bba1d7206081b52d35f4b3ed143.dir
       size: 428691342
       nfiles: 25000
+  train:
+    cmd: python -m cats_dogs_mlops.train --manifest data/processed/manifest.csv 
+      --model-out models/model.pt --metrics-out reports/train_metrics.json 
+      --figures-dir figures --architecture mobilenet_v3_small --pretrained true 
+      --freeze-backbone false --epochs 15 --batch-size 32 --learning-rate 0.0001
+      --weight-decay 0.0001 --image-size 224 --seed 42 --device auto --amp true 
+      --patience 4 --scheduler-patience 2 --scheduler-factor 0.3 
+      --label-smoothing 0.05 --gradient-clip 1.0
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: b35f5bba1d7206081b52d35f4b3ed143.dir
+      size: 428691342
+      nfiles: 25000
+    - path: src/cats_dogs_mlops/data.py
+      hash: md5
+      md5: 26e79b374f13bf5a05b381b4895c3a1a
+      size: 8190
+    - path: src/cats_dogs_mlops/model.py
+      hash: md5
+      md5: fad0668dc248eb17e8ed451a71b42206
+      size: 3434
+    - path: src/cats_dogs_mlops/train.py
+      hash: md5
+      md5: a55545a4f896ce6dd0d5c4bc313d016d
+      size: 25318
+    params:
+      params.yaml:
+        data.image_size: 224
+        training.architecture: mobilenet_v3_small
+        training.batch_size: 32
+        training.epochs: 15
+        training.freeze_backbone: false
+        training.learning_rate: 0.0001
+        training.pretrained: true
+        training.seed: 42
+        training.weight_decay: 0.0001
+    outs:
+    - path: figures/confusion_matrix.png
+      hash: md5
+      md5: c6f5bee7ba1862cffd1b333f85704f28
+      size: 32343
+    - path: figures/loss_curves.png
+      hash: md5
+      md5: 7fab3de964a3b26d1187f33784c3fc90
+      size: 78248
+    - path: figures/precision_recall_curve.png
+      hash: md5
+      md5: d265972fd5cc53a0b7f9ac0f416be28e
+      size: 35586
+    - path: figures/roc_curve.png
+      hash: md5
+      md5: b40cccde26e34f647f0e509984e00e56
+      size: 49119
+    - path: models/model.pt
+      hash: md5
+      md5: 0e0e4c30125dc5aebd861e4599c3625b
+      size: 6200099
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 8990c691e88903b9c77db511a50e03a9
+      size: 2726
+  evaluate:
+    cmd: python -m cats_dogs_mlops.evaluate --manifest 
+      data/processed/manifest.csv --model models/model.pt --metrics-out 
+      reports/test_metrics.json --batch-size 32
+    deps:
+    - path: data/processed/manifest.csv
+      hash: md5
+      md5: 02f763f4e43ab3b8782cedd5d0a33561
+      size: 2790390
+    - path: models/model.pt
+      hash: md5
+      md5: 0e0e4c30125dc5aebd861e4599c3625b
+      size: 6200099
+    - path: src/cats_dogs_mlops/data.py
+      hash: md5
+      md5: 26e79b374f13bf5a05b381b4895c3a1a
+      size: 8190
+    - path: src/cats_dogs_mlops/evaluate.py
+      hash: md5
+      md5: b9a73a8a9f712c31e3bebc3639f65526
+      size: 2268
+    - path: src/cats_dogs_mlops/model.py
+      hash: md5
+      md5: fad0668dc248eb17e8ed451a71b42206
+      size: 3434
+    params:
+      params.yaml:
+        data.processed_dir: data/processed
+        training.batch_size: 32
+    outs:
+    - path: reports/test_metrics.json
+      hash: md5
+      md5: 160e90e773d7bf1a12a75facd27a4596
+      size: 1024
