@@ -1,0 +1,35 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m cats_dogs_mlops.prepare_data --raw-dir 
+      data/raw/dog-and-cat-classification-dataset/PetImages --processed-dir 
+      data/processed --image-size 224 --train-ratio 0.8 --val-ratio 0.1 --seed 
+      42
+    deps:
+    - path: data/raw/dog-and-cat-classification-dataset/PetImages
+      hash: md5
+      md5: 3a5cf86541f22c236620ce5b952ad684.dir
+      size: 848866410
+      nfiles: 24998
+    - path: src/cats_dogs_mlops/data.py
+      hash: md5
+      md5: 26e79b374f13bf5a05b381b4895c3a1a
+      size: 8190
+    - path: src/cats_dogs_mlops/prepare_data.py
+      hash: md5
+      md5: 4fc96f0981d21d8ce3fbf62f1e8680ef
+      size: 1142
+    params:
+      params.yaml:
+        data.image_size: 224
+        data.processed_dir: data/processed
+        data.raw_dir: data/raw/dog-and-cat-classification-dataset/PetImages
+        data.seed: 42
+        data.train_ratio: 0.8
+        data.validation_ratio: 0.1
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: b35f5bba1d7206081b52d35f4b3ed143.dir
+      size: 428691342
+      nfiles: 25000

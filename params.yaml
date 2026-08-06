@@ -1,11 +1,12 @@
 data:
-  raw_dir: data/raw
+  raw_dir: data/raw/dog-and-cat-classification-dataset/PetImages
   processed_dir: data/processed
   image_size: 224
   train_ratio: 0.80
   validation_ratio: 0.10
   seed: 42
   max_per_class: null
+
 training:
   architecture: tinycnn
   pretrained: false

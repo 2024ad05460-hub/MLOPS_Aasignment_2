@@ -16,3 +16,10 @@ kaggle.json
 _docx_render/
 evidence/*.bundle
 evidence/git_bundle_verify.txt
+
+# DVC-managed training outputs
+models/model.pt
+figures/loss_curves.png
+figures/confusion_matrix.png
+reports/train_metrics.json
+reports/test_metrics.json
