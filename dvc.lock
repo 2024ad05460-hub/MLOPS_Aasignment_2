@@ -73,28 +73,28 @@ stages:
     outs:
     - path: figures/confusion_matrix.png
       hash: md5
-      md5: c6f5bee7ba1862cffd1b333f85704f28
-      size: 32343
+      md5: 9ed1344a2e1a887f1061f391ad7b5fea
+      size: 31976
     - path: figures/loss_curves.png
       hash: md5
-      md5: 7fab3de964a3b26d1187f33784c3fc90
-      size: 78248
+      md5: 1486f8e714574241bb93b6133d03ca0d
+      size: 80119
     - path: figures/precision_recall_curve.png
       hash: md5
-      md5: d265972fd5cc53a0b7f9ac0f416be28e
-      size: 35586
+      md5: 87054f63d917703ee9eecf6945b4d959
+      size: 38332
     - path: figures/roc_curve.png
       hash: md5
-      md5: b40cccde26e34f647f0e509984e00e56
-      size: 49119
+      md5: 2728cbdd6b30d34498f122137e1148b9
+      size: 48820
     - path: models/model.pt
       hash: md5
-      md5: 0e0e4c30125dc5aebd861e4599c3625b
+      md5: c703d789e26375b7dacf7ca8e105a675
       size: 6200099
     - path: reports/train_metrics.json
       hash: md5
-      md5: 8990c691e88903b9c77db511a50e03a9
-      size: 2726
+      md5: 8883f0a10bb0d03aca216adb9dec835b
+      size: 2817
   evaluate:
     cmd: python -m cats_dogs_mlops.evaluate --manifest 
       data/processed/manifest.csv --model models/model.pt --metrics-out 
@@ -106,7 +106,7 @@ stages:
       size: 2790390
     - path: models/model.pt
       hash: md5
-      md5: 0e0e4c30125dc5aebd861e4599c3625b
+      md5: c703d789e26375b7dacf7ca8e105a675
       size: 6200099
     - path: src/cats_dogs_mlops/data.py
       hash: md5
@@ -127,5 +127,5 @@ stages:
     outs:
     - path: reports/test_metrics.json
       hash: md5
-      md5: 160e90e773d7bf1a12a75facd27a4596
-      size: 1024
+      md5: 0d1ba9eed50c970d500d081e17755ebe
+      size: 1023
