@@ -1,0 +1,184 @@
+﻿{
+  "batch_summary": {
+    "sample_count": 20,
+    "cat_count": 10,
+    "dog_count": 10,
+    "correct_count": 20,
+    "accuracy": 1.0
+  },
+  "requests": [
+    {
+      "file": "test/cat/10824_aef8279fc7fb.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.980789,
+      "latency_ms": 128.805,
+      "correct": true
+    },
+    {
+      "file": "test/cat/3530_83c6b4a4907c.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.971263,
+      "latency_ms": 56.74,
+      "correct": true
+    },
+    {
+      "file": "test/cat/10675_e956dcb2b173.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.967986,
+      "latency_ms": 23.704,
+      "correct": true
+    },
+    {
+      "file": "test/cat/10423_605f18f8283d.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.972446,
+      "latency_ms": 14.117,
+      "correct": true
+    },
+    {
+      "file": "test/cat/3163_fa76700b21f6.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.967198,
+      "latency_ms": 64.8,
+      "correct": true
+    },
+    {
+      "file": "test/cat/1245_c039bc8929d4.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.968227,
+      "latency_ms": 25.25,
+      "correct": true
+    },
+    {
+      "file": "test/cat/5290_aba85c90a522.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.975742,
+      "latency_ms": 18.665,
+      "correct": true
+    },
+    {
+      "file": "test/cat/11479_522965716a7f.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.976308,
+      "latency_ms": 194.396,
+      "correct": true
+    },
+    {
+      "file": "test/cat/8094_dd33ab37506f.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.958747,
+      "latency_ms": 197.367,
+      "correct": true
+    },
+    {
+      "file": "test/cat/9741_e406ad89558d.jpg",
+      "predicted": "cat",
+      "true": "cat",
+      "confidence": 0.977286,
+      "latency_ms": 102.085,
+      "correct": true
+    },
+    {
+      "file": "test/dog/9574_f8325a3d2ce3.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.997991,
+      "latency_ms": 27.777,
+      "correct": true
+    },
+    {
+      "file": "test/dog/5238_11e5627b05b4.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.972966,
+      "latency_ms": 20.564,
+      "correct": true
+    },
+    {
+      "file": "test/dog/10545_f50d30679919.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.987869,
+      "latency_ms": 25.703,
+      "correct": true
+    },
+    {
+      "file": "test/dog/1754_26ccf7e5956b.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.977582,
+      "latency_ms": 14.255,
+      "correct": true
+    },
+    {
+      "file": "test/dog/8710_e0f62d658cca.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.979787,
+      "latency_ms": 22.924,
+      "correct": true
+    },
+    {
+      "file": "test/dog/11149_048b349d4a71.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.971785,
+      "latency_ms": 19.908,
+      "correct": true
+    },
+    {
+      "file": "test/dog/3411_37109939e93c.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.980762,
+      "latency_ms": 15.181,
+      "correct": true
+    },
+    {
+      "file": "test/dog/2497_5e5e458168db.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.984002,
+      "latency_ms": 20.854,
+      "correct": true
+    },
+    {
+      "file": "test/dog/11076_c6e63a6c81ca.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.977964,
+      "latency_ms": 19.967,
+      "correct": true
+    },
+    {
+      "file": "test/dog/7464_8ecf205bdf42.jpg",
+      "predicted": "dog",
+      "true": "dog",
+      "confidence": 0.98109,
+      "latency_ms": 25.459,
+      "correct": true
+    }
+  ],
+  "cumulative_performance": {
+    "labeled_count": 60,
+    "correct_count": 60,
+    "accuracy": 1.0,
+    "true_label_distribution": {
+      "cat": 40,
+      "dog": 20
+    },
+    "prediction_distribution": {
+      "cat": 40,
+      "dog": 20
+    }
+  }
+}
